@@ -2,7 +2,8 @@ name: Main Pipeline
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build-test:
@@ -17,9 +18,9 @@ jobs:
     outputs:
       short_sha: ${{ steps.sha.outputs.short }}
     steps:
-      - name: Get short SHA
-        id: sha
-        run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+      - id: sha
+        run: |
+          echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
 
   docker-build:
     needs: get-sha
@@ -47,4 +48,5 @@ jobs:
     environment: production
     steps:
       - name: Deploy
-        run: echo "Deploying image: ${{ needs.docker-build.outputs.image_url }} to production"
+        run: |
+          echo "Deploying image ${{ needs.docker-build.outputs.image_url }} to production"
