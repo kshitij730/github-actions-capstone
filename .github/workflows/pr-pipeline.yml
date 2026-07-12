@@ -2,8 +2,11 @@ name: PR Pipeline
 
 on:
   pull_request:
-    branches: [main]
-    types: [opened, synchronize]
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
 
 jobs:
   build-test:
@@ -16,5 +19,5 @@ jobs:
     needs: build-test
     runs-on: ubuntu-latest
     steps:
-      - name: Print summary
-        run: echo "PR checks passed for branch: ${{ github.head_ref }}"
+      - name: Print PR summary
+        run: echo "PR checks passed for branch ${{ github.head_ref }}"
