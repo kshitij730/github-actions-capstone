@@ -1,0 +1,45 @@
+name: Reusable - Build & Test
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        required: true
+        type: string
+      run_tests:
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      test_result:
+        description: "passed or failed"
+        value: ${{ jobs.build-test.outputs.result }}
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.set-result.outputs.result }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build image for testing
+        run: docker build -t capstone-image .
+
+      - name: Run tests
+        if: inputs.run_tests == true
+        run: bash test_health.sh
+
+      - name: Set result
+        id: set-result
+        if: always()
+        run: echo "result=${{ job.status == 'success' && 'passed' || 'failed' }}" >> "$GITHUB_OUTPUT"

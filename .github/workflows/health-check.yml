@@ -1,0 +1,37 @@
+name: Health Check
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull latest image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/capstone-app:latest
+
+      - name: Run container
+        run: docker run -d --name health-test -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/capstone-app:latest
+
+      - name: Wait and curl health endpoint
+        id: check
+        run: |
+          sleep 5
+          if curl -sf http://localhost:8000/health; then
+            echo "status=PASSED" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=FAILED" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stop container
+        if: always()
+        run: docker stop health-test && docker rm health-test
+
+      - name: Write summary
+        run: |
+          echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: capstone-app:latest" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ steps.check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
