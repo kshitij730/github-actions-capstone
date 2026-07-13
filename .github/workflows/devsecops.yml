@@ -1,0 +1,34 @@
+name: DevSecOps Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  code-quality:
+    uses: ./.github/workflows/code-quality.yml
+
+  secret-scan:
+    uses: ./.github/workflows/secret-scanning.yml
+
+  dependency-scan:
+    uses: ./.github/workflows/dependency-scan.yml
+
+  sonar-scan:
+    needs: code-quality
+    uses: ./.github/workflows/sonar-scan.yml
+    secrets:
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+
+  docker-scan:
+    needs: [secret-scan, dependency-scan]
+    uses: ./.github/workflows/docker-scans.yml
+    with:
+      image_name: capstone-app
+      tag: devsecops-scan
+
+  dast-scan:
+    needs: docker-scan
+    uses: ./.github/workflows/dast.yml

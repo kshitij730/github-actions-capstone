@@ -1,0 +1,23 @@
+name: Code Quality & Security Lint
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: pip install flake8 bandit
+
+      - name: Run flake8
+        run: flake8 app.py --max-line-length=100
+
+      - name: Run Bandit security lint
+        run: bandit -r . -x ./tests -ll
