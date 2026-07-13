@@ -3,10 +3,11 @@ from datetime import datetime
 
 app = FastAPI(title="Capstone Health API")
 
+
 @app.get("/health")
 def health():
     return {
         "status": "ok",
         "service": "github-actions-capstone",
-        "time": datetime.utcnow().isoformat()
+        "time": datetime.utcnow().isoformat(),
     }
