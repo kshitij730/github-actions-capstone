@@ -15,14 +15,7 @@ jobs:
       python_version: "3.11"
       run_tests: true
 
-  pr-comment:
-    needs: build-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print PR summary
-        run: echo "PR checks passed for branch ${{ github.head_ref }}"
-
-    sonar-scan:
+  sonar-scan:
     needs: build-test
     uses: ./.github/workflows/sonar-scan.yml
     secrets:
