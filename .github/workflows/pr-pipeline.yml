@@ -21,3 +21,18 @@ jobs:
     steps:
       - name: Print PR summary
         run: echo "PR checks passed for branch ${{ github.head_ref }}"
+
+    sonar-scan:
+    needs: build-test
+    uses: ./.github/workflows/sonar-scan.yml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  pr-comment:
+    needs:
+      - build-test
+      - sonar-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print PR summary
+        run: echo "PR checks passed for branch ${{ github.head_ref }}"

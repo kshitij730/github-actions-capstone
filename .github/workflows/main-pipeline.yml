@@ -11,7 +11,11 @@ jobs:
     with:
       python_version: "3.11"
       run_tests: true
-
+  sonar-scan:
+    needs: build-test
+    uses: ./.github/workflows/sonar-scan.yml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   get-sha:
     needs: build-test
     runs-on: ubuntu-latest
@@ -43,7 +47,7 @@ jobs:
       docker_token: ${{ secrets.DOCKER_TOKEN }}
 
   deploy:
-    needs: [docker-build, docker-build-sha]
+    needs: [docker-build, docker-build-sha, sonar-scan]
     runs-on: ubuntu-latest
     environment: production
     steps:
