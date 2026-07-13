@@ -3,25 +3,36 @@ name: DAST - OWASP ZAP Scan
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   zap-scan:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Build and run app
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
         run: |
           docker build -t capstone-image .
+
+      - name: Run Application
+        run: |
           docker run -d --name dast-target -p 8000:8000 capstone-image
-          sleep 5
+          sleep 10
 
       - name: Run OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:8000/health'
+          target: "http://localhost:8000/health"
           fail_action: false
-          cmd_options: '-a'
+          allow_issue_writing: false
+          cmd_options: "-a"
 
-      - name: Stop container
+      - name: Stop and Remove Container
         if: always()
-        run: docker stop dast-target && docker rm dast-target
+        run: |
+          docker stop dast-target || true
+          docker rm dast-target || true
