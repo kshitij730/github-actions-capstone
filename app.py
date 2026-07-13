@@ -4,6 +4,13 @@ from datetime import datetime
 app = FastAPI(title="Capstone Health API")
 
 
+@app.get("/")
+def home():
+    return {
+        "message": "Welcome to GitHub Actions Capstone API"
+    }
+
+
 @app.get("/health")
 def health():
     return {
